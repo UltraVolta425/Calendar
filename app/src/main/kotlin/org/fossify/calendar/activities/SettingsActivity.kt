@@ -13,6 +13,7 @@ import org.fossify.calendar.R
 import org.fossify.calendar.databinding.ActivitySettingsBinding
 import org.fossify.calendar.dialogs.ExportEventsDialog
 import org.fossify.calendar.dialogs.ManageAutomaticBackupsDialog
+import org.fossify.calendar.dialogs.ManageDayLabelsDialog
 import org.fossify.calendar.dialogs.ManageSyncedCalendarsDialog
 import org.fossify.calendar.dialogs.SelectCalendarDialog
 import org.fossify.calendar.dialogs.SelectCalendarsDialog
@@ -30,6 +31,8 @@ import org.fossify.calendar.helpers.ALLOW_CHANGING_TIME_ZONES
 import org.fossify.calendar.helpers.ALLOW_CREATING_TASKS
 import org.fossify.calendar.helpers.ALLOW_CUSTOMIZE_DAY_COUNT
 import org.fossify.calendar.helpers.DAILY_VIEW
+import org.fossify.calendar.helpers.DAY_LABELS
+import org.fossify.calendar.helpers.DayLabels
 import org.fossify.calendar.helpers.DEFAULT_DURATION
 import org.fossify.calendar.helpers.DEFAULT_REMINDER_1
 import org.fossify.calendar.helpers.DEFAULT_REMINDER_2
@@ -192,6 +195,7 @@ class SettingsActivity : SimpleActivity() {
         setupDeleteAllEvents()
         setupDisplayDescription()
         setupReplaceDescription()
+        setupDayLabels()
         setupWeekNumbers()
         setupShowGrid()
         setupWeeklyStart()
@@ -236,6 +240,7 @@ class SettingsActivity : SimpleActivity() {
             binding.settingsRemindersLabel,
             binding.settingsCaldavLabel,
             binding.settingsNewEventsLabel,
+            binding.settingsDailyViewLabel,
             binding.settingsWeeklyViewLabel,
             binding.settingsMonthlyViewLabel,
             binding.settingsEventListsLabel,
@@ -607,6 +612,20 @@ class SettingsActivity : SimpleActivity() {
             settingsStartWeekWithCurrentDay.toggle()
             config.startWeekWithCurrentDay = settingsStartWeekWithCurrentDay.isChecked
         }
+    }
+
+    private fun setupDayLabels() = binding.apply {
+        updateDayLabelsText()
+        settingsDayLabelsHolder.setOnClickListener {
+            ManageDayLabelsDialog(this@SettingsActivity) {
+                updateDayLabelsText()
+            }
+        }
+    }
+
+    private fun updateDayLabelsText() {
+        binding.settingsDayLabels.text = config.dayLabels.joinToString(", ") { it.title }
+            .ifEmpty { getString(org.fossify.commons.R.string.none) }
     }
 
     private fun setupWeekNumbers() = binding.apply {
@@ -1158,6 +1177,7 @@ class SettingsActivity : SimpleActivity() {
                 put(HIGHLIGHT_WEEKENDS, config.highlightWeekends)
                 put(HIGHLIGHT_WEEKENDS_COLOR, config.highlightWeekendsColor)
                 put(ALLOW_CREATING_TASKS, config.allowCreatingTasks)
+                put(DAY_LABELS, DayLabels.toJson(config.dayLabels))
             }
 
             exportSettings(configItems)
@@ -1274,6 +1294,7 @@ class SettingsActivity : SimpleActivity() {
                 HIGHLIGHT_WEEKENDS -> config.highlightWeekends = value.toBoolean()
                 HIGHLIGHT_WEEKENDS_COLOR -> config.highlightWeekendsColor = value.toInt()
                 ALLOW_CREATING_TASKS -> config.allowCreatingTasks = value.toBoolean()
+                DAY_LABELS -> config.dayLabels = DayLabels.fromJson(value.toString())
             }
         }
 

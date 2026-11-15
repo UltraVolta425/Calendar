@@ -155,6 +155,15 @@
     <string name="week">Week</string>
     <string name="start_week_with_current_day">Start week with the current day</string>
 
+    <!-- Day labels -->
+    <string name="day_labels">Day labels</string>
+    <string name="add_day_label">Add a day label</string>
+    <string name="edit_day_label">Edit day label</string>
+    <string name="day_label_start_date">Count from</string>
+    <string name="day_labels_placeholder">Show how much time has passed since a date, below the date in the daily view.</string>
+    <!-- Shown below the date in the daily view, for example "Together: 1 year, 10 months, 3 days" -->
+    <string name="day_label_text">%1$s: %2$s</string>
+
     <!-- Calendars -->
     <string name="event_types">Calendars</string>
     <string name="add_new_type">Add a new calendar</string>

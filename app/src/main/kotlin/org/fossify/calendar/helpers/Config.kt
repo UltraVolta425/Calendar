@@ -6,6 +6,7 @@ import android.media.RingtoneManager
 import org.fossify.calendar.R
 import org.fossify.calendar.extensions.config
 import org.fossify.calendar.extensions.scheduleCalDAVSync
+import org.fossify.calendar.models.DayLabel
 import org.fossify.commons.extensions.getDefaultAlarmTitle
 import org.fossify.commons.helpers.BaseConfig
 import org.fossify.commons.helpers.DAY_MINUTES
@@ -107,6 +108,10 @@ class Config(context: Context) : BaseConfig(context) {
         currQuickFilterCalendars.add(type)
         quickFilterCalendars = currQuickFilterCalendars
     }
+
+    var dayLabels: List<DayLabel>
+        get() = DayLabels.fromJson(prefs.getString(DAY_LABELS, null) ?: "[]")
+        set(dayLabels) = prefs.edit().putString(DAY_LABELS, DayLabels.toJson(dayLabels)).apply()
 
     val holidayPaths: Set<String>
         get() = prefs.getStringSet(HOLIDAY_PATHS, emptySet())!!.toSet()

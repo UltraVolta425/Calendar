@@ -41,6 +41,7 @@ class DayFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        updateDayLabels()
         updateCalendar()
     }
 
@@ -81,6 +82,18 @@ class DayFragment : Fragment() {
                 (activity as MainActivity).showGoToDateDialog()
             }
             setTextColor(context.getProperTextColor())
+        }
+    }
+
+    private fun updateDayLabels() {
+        val labels = requireContext().config.dayLabels.mapNotNull {
+            DayLabels.getText(resources, it, mDayCode)
+        }
+
+        binding.dayLabels.apply {
+            text = labels.joinToString("\n")
+            setTextColor(mTextColor)
+            beVisibleIf(labels.isNotEmpty())
         }
     }
 
@@ -138,6 +151,7 @@ class DayFragment : Fragment() {
             topLeftArrow.beGone()
             topRightArrow.beGone()
             topValue.setTextColor(resources.getColor(org.fossify.commons.R.color.theme_light_text_color))
+            binding.dayLabels.setTextColor(resources.getColor(org.fossify.commons.R.color.theme_light_text_color))
             (binding.dayEvents.adapter as? DayEventsAdapter)?.togglePrintMode()
 
             Handler().postDelayed({
@@ -147,6 +161,7 @@ class DayFragment : Fragment() {
                     topLeftArrow.beVisible()
                     topRightArrow.beVisible()
                     topValue.setTextColor(requireContext().getProperTextColor())
+                    binding.dayLabels.setTextColor(requireContext().getProperTextColor())
                     (binding.dayEvents.adapter as? DayEventsAdapter)?.togglePrintMode()
                 }, 1000)
             }, 1000)
