@@ -4,13 +4,10 @@ import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
-import android.net.Uri
-import android.provider.CalendarContract
 import android.provider.CalendarContract.Attendees
 import android.provider.CalendarContract.Calendars
 import android.provider.CalendarContract.Colors
 import android.provider.CalendarContract.Events
-import android.provider.CalendarContract.ExtendedProperties
 import android.provider.CalendarContract.Reminders
 import android.widget.Toast
 import org.fossify.calendar.R
@@ -31,8 +28,6 @@ import org.fossify.calendar.models.Event
 import org.fossify.calendar.models.Reminder
 import org.fossify.calendar.objects.States.isUpdatingCalDAV
 import org.fossify.commons.extensions.addBitIf
-import org.json.JSONArray
-import org.json.JSONException
 import org.fossify.commons.extensions.areDigitsOnly
 import org.fossify.commons.extensions.getIntValue
 import org.fossify.commons.extensions.getIntValueOrNull
@@ -50,6 +45,7 @@ import kotlin.math.max
 
 @SuppressLint("MissingPermission")
 class CalDAVHelper(val context: Context) {
+    private val hiddenInMonthView = CalDAVHiddenInMonthView(context)
     private val eventsHelper = context.eventsHelper
 
     fun refreshCalendars(showToasts: Boolean, scheduleNextSync: Boolean, callback: () -> Unit) {
@@ -287,7 +283,7 @@ class CalDAVHelper(val context: Context) {
                 attendees = attendees,
                 importId = importId,
                 timeZone = eventTimeZone,
-                flags = allDay.addBitIf(isCalDAVEventHiddenInMonthView(id), FLAG_HIDE_IN_MONTH_VIEW),
+                flags = allDay.addBitIf(hiddenInMonthView.isHidden(id), FLAG_HIDE_IN_MONTH_VIEW),
                 calendarId = localCalendarId,
                 source = source,
                 accessLevel = accessLevel,
@@ -507,87 +503,10 @@ class CalDAVHelper(val context: Context) {
         }
     }
 
-    /**
-     * Whether the CalDAV event carries X-FOSSIFY-HIDE-IN-MONTH-VIEW:TRUE, as stored by DAVx5 in an extended property.
-     * Reading extended properties is allowed for any app with calendar access.
-     */
-    private fun isCalDAVEventHiddenInMonthView(eventId: Long): Boolean {
-        return getHideInMonthViewPropertyIds(eventId).isNotEmpty()
-    }
-
-    private fun getHideInMonthViewPropertyIds(eventId: Long): List<Long> {
-        val ids = ArrayList<Long>()
-        val projection = arrayOf(ExtendedProperties._ID, ExtendedProperties.VALUE)
-        val selection = "${ExtendedProperties.EVENT_ID} = ? AND ${ExtendedProperties.NAME} = ?"
-        val selectionArgs = arrayOf(eventId.toString(), DAVX5_UNKNOWN_PROPERTY)
-        context.queryCursorInlined(ExtendedProperties.CONTENT_URI, projection, selection, selectionArgs) { cursor ->
-            val value = cursor.getStringValue(ExtendedProperties.VALUE) ?: return@queryCursorInlined
-            try {
-                val property = JSONArray(value)
-                if (property.optString(0) == HIDE_IN_MONTH_VIEW && property.optString(1).equals("TRUE", true)) {
-                    ids.add(cursor.getLongValue(ExtendedProperties._ID))
-                }
-            } catch (_: JSONException) {
-                // another app's or a malformed property, not ours
-            }
-        }
-        return ids
-    }
-
-    /**
-     * Stores "hide in monthly view" in the event as X-FOSSIFY-HIDE-IN-MONTH-VIEW:TRUE, so it syncs to other devices.
-     * Android only lets sync adapters write extended properties, so this writes them on behalf of DAVx5 in DAVx5's own
-     * unknown-property format, then marks the event dirty so DAVx5 uploads it. Only done for DAVx5 accounts.
-     */
     private fun setupCalDAVEventHiddenInMonthView(event: Event) {
-        val eventId = event.getCalDAVEventId()
-        val existing = getHideInMonthViewPropertyIds(eventId)
-        val hidden = event.isHiddenInMonthView()
-        if (hidden == existing.isNotEmpty()) {
-            return
+        hiddenInMonthView.store(event) {
+            getCalDAVCalendars(event.getCalDAVCalendarId().toString(), false).firstOrNull()
         }
-
-        val calendar = getCalDAVCalendars(event.getCalDAVCalendarId().toString(), false).firstOrNull()
-        if (calendar == null || calendar.accountType != DAVX5_ACCOUNT_TYPE) {
-            if (hidden) {
-                context.toast(R.string.hide_in_monthly_view_needs_davx5, Toast.LENGTH_LONG)
-            }
-            return
-        }
-
-        try {
-            val propertiesUri = asSyncAdapter(ExtendedProperties.CONTENT_URI, calendar)
-            if (hidden) {
-                val values = ContentValues().apply {
-                    put(ExtendedProperties.EVENT_ID, eventId)
-                    put(ExtendedProperties.NAME, DAVX5_UNKNOWN_PROPERTY)
-                    put(ExtendedProperties.VALUE, JSONArray(listOf(HIDE_IN_MONTH_VIEW, "TRUE")).toString())
-                }
-                context.contentResolver.insert(propertiesUri, values)
-            } else {
-                val placeholders = existing.joinToString(",") { "?" }
-                context.contentResolver.delete(
-                    propertiesUri,
-                    "${ExtendedProperties._ID} IN ($placeholders)",
-                    existing.map { it.toString() }.toTypedArray()
-                )
-            }
-
-            // written as the sync adapter, so the provider did not flag the event for upload: do it explicitly
-            val dirty = ContentValues().apply { put(Events.DIRTY, 1) }
-            val eventUri = asSyncAdapter(ContentUris.withAppendedId(Events.CONTENT_URI, eventId), calendar)
-            context.contentResolver.update(eventUri, dirty, null, null)
-        } catch (e: Exception) {
-            context.toast(R.string.hide_in_monthly_view_sync_failed, Toast.LENGTH_LONG)
-        }
-    }
-
-    private fun asSyncAdapter(uri: Uri, calendar: CalDAVCalendar): Uri {
-        return uri.buildUpon()
-            .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true")
-            .appendQueryParameter(Calendars.ACCOUNT_NAME, calendar.accountName)
-            .appendQueryParameter(Calendars.ACCOUNT_TYPE, calendar.accountType)
-            .build()
     }
 
     private fun setupCalDAVEventImportId(event: Event) {

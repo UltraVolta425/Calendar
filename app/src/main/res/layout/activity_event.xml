@@ -598,6 +598,7 @@
                 android:layout_marginTop="@dimen/medium_margin"
                 android:layout_toEndOf="@+id/event_hide_in_month_view_image"
                 android:background="?attr/selectableItemBackground"
+                android:paddingStart="0dp"
                 android:paddingTop="@dimen/medium_margin"
                 android:paddingEnd="@dimen/activity_margin"
                 android:paddingBottom="@dimen/medium_margin">
