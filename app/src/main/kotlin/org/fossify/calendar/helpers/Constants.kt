@@ -170,6 +170,15 @@ const val FLAG_ALL_DAY = 1
 const val FLAG_IS_IN_PAST = 2
 const val FLAG_MISSING_YEAR = 4
 const val FLAG_TASK_COMPLETED = 8
+const val FLAG_HIDE_IN_MONTH_VIEW = 16
+
+// "Hide in monthly view": stored in the event itself as this iCalendar property, so it syncs.
+// For CalDAV calendars synced by DAVx5 it travels as one of DAVx5's "unknown property" extended properties
+// (name and JSON format from DAVx5's synctools UnknownProperty, checked in 4.5.21).
+const val HIDE_IN_MONTH_VIEW = "X-FOSSIFY-HIDE-IN-MONTH-VIEW"
+const val HIDE_IN_MONTH_VIEW_STATE = "hide_in_month_view"
+const val DAVX5_ACCOUNT_TYPE = "bitfire.at.davdroid"
+const val DAVX5_UNKNOWN_PROPERTY = "vnd.android.cursor.item/vnd.ical4android.unknown-property"
 
 // constants related to ICS file exporting / importing
 const val BEGIN_CALENDAR = "BEGIN:VCALENDAR"

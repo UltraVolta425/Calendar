@@ -247,6 +247,10 @@ class IcsImporter(val activity: SimpleActivity) {
                         if (isParsingTask && line.substring(COMPLETED.length).trim().isNotEmpty()) {
                             curFlags = curFlags or FLAG_TASK_COMPLETED
                         }
+                    } else if (line.startsWith("$HIDE_IN_MONTH_VIEW:")) {
+                        if (line.substringAfter(":").trim().equals("TRUE", true)) {
+                            curFlags = curFlags or FLAG_HIDE_IN_MONTH_VIEW
+                        }
                     } else if (line.startsWith(CATEGORIES) && !overrideFileCalendars) {
                         val categories = line.substring(CATEGORIES.length)
                         tryAddCategories(categories)

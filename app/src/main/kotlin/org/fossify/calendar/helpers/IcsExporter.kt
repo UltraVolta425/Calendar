@@ -157,6 +157,9 @@ class IcsExporter(private val context: Context) {
             }
             writeLn("$CATEGORIES${context.calendarsDB.getCalendarWithId(event.calendarId)?.title}")
             writeLn("$LAST_MODIFIED:${Formatter.getExportedTime(event.lastUpdated)}")
+            if (event.isHiddenInMonthView()) {
+                writeLn("$HIDE_IN_MONTH_VIEW:TRUE")
+            }
             writeLn("$TRANSP${if (event.availability == Events.AVAILABILITY_FREE) TRANSPARENT else OPAQUE}")
             event.location.let { if (it.isNotEmpty()) writeLn("$LOCATION:$it") }
 

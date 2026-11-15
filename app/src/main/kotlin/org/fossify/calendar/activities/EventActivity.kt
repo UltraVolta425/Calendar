@@ -74,6 +74,8 @@ import org.fossify.calendar.helpers.EVENT_COLOR
 import org.fossify.calendar.helpers.EVENT_ID
 import org.fossify.calendar.helpers.EVENT_OCCURRENCE_TS
 import org.fossify.calendar.helpers.FLAG_ALL_DAY
+import org.fossify.calendar.helpers.FLAG_HIDE_IN_MONTH_VIEW
+import org.fossify.calendar.helpers.HIDE_IN_MONTH_VIEW_STATE
 import org.fossify.calendar.helpers.Formatter
 import org.fossify.calendar.helpers.IS_DUPLICATE_INTENT
 import org.fossify.calendar.helpers.IS_NEW_EVENT
@@ -197,6 +199,7 @@ class EventActivity : SimpleActivity() {
     private var mSelectedContacts = ArrayList<Attendee>()
     private var mAvailability = Attendees.AVAILABILITY_BUSY
     private var mAccessLevel = Events.ACCESS_DEFAULT
+    private var mHideInMonthView = false
     private var mStatus = Events.STATUS_CONFIRMED
     private var mStoredCalendars = ArrayList<CalendarEntity>()
     private var mOriginalTimeZone = DateTimeZone.getDefault().id
@@ -328,6 +331,7 @@ class EventActivity : SimpleActivity() {
             putString(ORIGINAL_ATTENDEES, Gson().toJson(mOriginalAttendees))
 
             putInt(CLASS, mAccessLevel)
+            putBoolean(HIDE_IN_MONTH_VIEW_STATE, mHideInMonthView)
             putInt(AVAILABILITY, mAvailability)
             putInt(STATUS, mStatus)
             putInt(EVENT_COLOR, mEventColor)
@@ -363,6 +367,7 @@ class EventActivity : SimpleActivity() {
             mReminder3Type = getInt(REMINDER_3_TYPE)
 
             mAccessLevel = getInt(CLASS)
+            mHideInMonthView = getBoolean(HIDE_IN_MONTH_VIEW_STATE)
             mAvailability = getInt(AVAILABILITY)
             mStatus = getInt(STATUS)
             mEventColor = getInt(EVENT_COLOR)
@@ -568,6 +573,11 @@ class EventActivity : SimpleActivity() {
             eventAllDay.toggle()
         }
 
+        eventHideInMonthViewHolder.setOnClickListener {
+            eventHideInMonthView.toggle()
+            mHideInMonthView = eventHideInMonthView.isChecked
+        }
+
         eventColorHolder.setOnClickListener {
             showEventColorDialog()
         }
@@ -670,6 +680,7 @@ class EventActivity : SimpleActivity() {
                 attendeesChanged() ||
                 mAvailability != mEvent.availability ||
                 mAccessLevel != mEvent.accessLevel ||
+                mHideInMonthView != mEvent.isHiddenInMonthView() ||
                 mStatus != mEvent.status ||
                 mCalendarId != mEvent.calendarId ||
                 mWasCalendarChanged ||
@@ -702,6 +713,7 @@ class EventActivity : SimpleActivity() {
         updateAvailabilityText()
         updateStatusText()
         updateAccessLevelText()
+        binding.eventHideInMonthView.isChecked = mHideInMonthView
     }
 
     private fun setupEditEvent() {
@@ -747,6 +759,7 @@ class EventActivity : SimpleActivity() {
         mEventCalendarId = mEvent.getCalDAVCalendarId()
         mAvailability = mEvent.availability
         mAccessLevel = mEvent.accessLevel
+        mHideInMonthView = mEvent.isHiddenInMonthView()
         mStatus = mEvent.status
         mEventColor = mEvent.color
 
@@ -1687,6 +1700,7 @@ class EventActivity : SimpleActivity() {
             timeZone =
                 if (mIsAllDayEvent || timeZone.isEmpty()) DateTimeZone.getDefault().id else timeZone
             flags = mEvent.flags.addBitIf(binding.eventAllDay.isChecked, FLAG_ALL_DAY)
+                .addBitIf(mHideInMonthView, FLAG_HIDE_IN_MONTH_VIEW)
             repeatLimit = if (repeatInterval == 0) 0 else mRepeatLimit
             repeatRule = mRepeatRule
             attendees =
@@ -2414,6 +2428,7 @@ class EventActivity : SimpleActivity() {
             eventStatusImage,
             eventAccessLevelImage,
             eventAvailabilityImage,
+            eventHideInMonthViewImage,
             eventColorImage
         ).forEach {
             it.applyColorFilter(textColor)

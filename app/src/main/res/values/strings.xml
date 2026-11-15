@@ -155,6 +155,11 @@
     <string name="week">Week</string>
     <string name="start_week_with_current_day">Start week with the current day</string>
 
+    <!-- Hide in monthly view -->
+    <string name="hide_in_monthly_view">Hide in monthly view</string>
+    <string name="hide_in_monthly_view_needs_davx5">"Hide in monthly view" is only kept for calendars synced with DAVx5</string>
+    <string name="hide_in_monthly_view_sync_failed">Could not store "Hide in monthly view" in the calendar</string>
+
     <!-- Day labels -->
     <string name="day_labels">Day labels</string>
     <string name="add_day_label">Add a day label</string>

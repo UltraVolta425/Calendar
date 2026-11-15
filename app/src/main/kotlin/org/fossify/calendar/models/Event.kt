@@ -11,6 +11,7 @@ import org.fossify.calendar.extensions.seconds
 import org.fossify.calendar.helpers.CALDAV
 import org.fossify.calendar.helpers.DAY
 import org.fossify.calendar.helpers.FLAG_ALL_DAY
+import org.fossify.calendar.helpers.FLAG_HIDE_IN_MONTH_VIEW
 import org.fossify.calendar.helpers.FLAG_IS_IN_PAST
 import org.fossify.calendar.helpers.FLAG_MISSING_YEAR
 import org.fossify.calendar.helpers.FLAG_TASK_COMPLETED
@@ -180,6 +181,8 @@ data class Event(
     }
 
     fun getIsAllDay() = flags and FLAG_ALL_DAY != 0
+
+    fun isHiddenInMonthView() = flags and FLAG_HIDE_IN_MONTH_VIEW != 0
     fun hasMissingYear() = flags and FLAG_MISSING_YEAR != 0
     fun isTask() = type == TYPE_TASK
     fun isTaskCompleted() = isTask() && flags and FLAG_TASK_COMPLETED != 0

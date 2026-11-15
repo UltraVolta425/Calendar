@@ -127,7 +127,7 @@ class MonthlyCalendarImpl(val callback: MonthlyCalendar, val context: Context) {
         }
 
     private fun gotEvents(events: ArrayList<Event>) {
-        mEvents = events
+        mEvents = events.filterNot { it.isHiddenInMonthView() }.toCollection(ArrayList())
         getDays(true)
     }
 }

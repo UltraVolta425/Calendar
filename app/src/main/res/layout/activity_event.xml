@@ -579,10 +579,54 @@
                 android:importantForAccessibility="no" />
 
             <ImageView
+                android:id="@+id/event_hide_in_month_view_image"
+                android:layout_width="@dimen/smaller_icon_size"
+                android:layout_height="@dimen/smaller_icon_size"
+                android:layout_alignTop="@+id/event_hide_in_month_view_holder"
+                android:layout_alignBottom="@+id/event_hide_in_month_view_holder"
+                android:layout_marginStart="@dimen/normal_margin"
+                android:importantForAccessibility="no"
+                android:padding="@dimen/medium_margin"
+                android:src="@drawable/ic_hide_vector" />
+
+            <RelativeLayout
+                android:id="@+id/event_hide_in_month_view_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/event_availability_divider"
+                android:layout_marginStart="@dimen/small_margin"
+                android:layout_marginTop="@dimen/medium_margin"
+                android:layout_toEndOf="@+id/event_hide_in_month_view_image"
+                android:background="?attr/selectableItemBackground"
+                android:paddingTop="@dimen/medium_margin"
+                android:paddingEnd="@dimen/activity_margin"
+                android:paddingBottom="@dimen/medium_margin">
+
+                <org.fossify.commons.views.MyMaterialSwitch
+                    android:id="@+id/event_hide_in_month_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:clickable="false"
+                    android:text="@string/hide_in_monthly_view"
+                    android:textSize="@dimen/day_text_size" />
+
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/event_hide_in_month_view_divider"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/divider_height"
+                android:layout_below="@+id/event_hide_in_month_view_holder"
+                android:layout_marginTop="@dimen/medium_margin"
+                android:background="@color/divider_grey"
+                android:importantForAccessibility="no" />
+
+            <ImageView
                 android:id="@+id/event_calendar_image"
                 android:layout_width="@dimen/smaller_icon_size"
                 android:layout_height="@dimen/smaller_icon_size"
-                android:layout_below="@+id/event_availability_divider"
+                android:layout_below="@+id/event_hide_in_month_view_divider"
                 android:layout_alignTop="@+id/event_calendar_holder"
                 android:layout_alignEnd="@+id/event_time_image"
                 android:layout_alignBottom="@+id/event_calendar_holder"
@@ -594,7 +638,7 @@
                 android:id="@+id/event_calendar_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/event_availability_divider"
+                android:layout_below="@+id/event_hide_in_month_view_divider"
                 android:layout_toEndOf="@+id/event_calendar_image"
                 android:background="?attr/selectableItemBackground">
 
