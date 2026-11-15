@@ -1,0 +1,64 @@
+# Fork-only build for the day-labels feature (never part of the upstream PR).
+# Runs the same checks as Fossify's PR CI and uploads an UNSIGNED minified release APK;
+# signing happens on the NAS so the key never leaves it.
+name: Bastion build (day labels)
+
+on:
+  push:
+    branches: [bastion-build]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bastion-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: gradle
+
+      - name: Unit tests
+        run: ./gradlew :app:testFossDebugUnitTest
+
+      - name: Detekt
+        if: success() || failure()
+        run: ./gradlew detekt
+
+      - name: Android lint
+        if: success() || failure()
+        run: ./gradlew lint
+
+      - name: Minified release APK (unsigned)
+        if: success() || failure()
+        run: ./gradlew :app:assembleFossRelease
+
+      - name: Upload APK
+        if: success() || failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: foss-release-unsigned
+          path: app/build/outputs/apk/foss/release/*.apk
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload reports
+        if: success() || failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: reports
+          path: |
+            app/build/reports/
+            app/build/test-results/
+            build/reports/
+          if-no-files-found: warn
+          retention-days: 14
