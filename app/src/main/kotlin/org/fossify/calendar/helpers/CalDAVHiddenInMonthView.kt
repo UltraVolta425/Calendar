@@ -32,7 +32,10 @@ class CalDAVHiddenInMonthView(private val context: Context) {
 
     fun isHidden(eventId: Long): Boolean = getPropertyIds(eventId).isNotEmpty()
 
-    /** Brings the event's extended properties in line with [Event.isHiddenInMonthView]; looks up the calendar only if needed. */
+    /**
+     * Brings the event's extended properties in line with [Event.isHiddenInMonthView].
+     * Looks up the calendar only when something has to change.
+     */
     fun store(event: Event, findCalendar: () -> CalDAVCalendar?) {
         val eventId = event.getCalDAVEventId()
         val existing = getPropertyIds(eventId)
