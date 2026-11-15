@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
     android:minHeight="@dimen/list_touch_target_min"
-    android:paddingStart="@dimen/activity_margin">
+    android:paddingStart="@dimen/activity_margin"
+    android:paddingEnd="0dp">
 
     <org.fossify.commons.views.MyTextView
         android:id="@+id/day_label_title"
